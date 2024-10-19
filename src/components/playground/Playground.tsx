@@ -2,8 +2,6 @@
 
 import { LoadingSVG } from "@/components/button/LoadingSVG";
 import { ChatMessageType } from "@/components/chat/ChatTile";
-import { ColorPicker } from "@/components/colorPicker/ColorPicker";
-import { AudioInputTile } from "@/components/config/AudioInputTile";
 import { ConfigurationPanelItem } from "@/components/config/ConfigurationPanelItem";
 import { NameValueRow } from "@/components/config/NameValueRow";
 import { PlaygroundHeader } from "@/components/playground/PlaygroundHeader";
@@ -34,6 +32,7 @@ import {
 } from "livekit-client";
 import { QRCodeSVG } from "qrcode.react";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import {AudioInputTile} from "@/components/config/AudioInputTile";
 
 export interface PlaygroundMeta {
   name: string;
@@ -89,7 +88,6 @@ export default function Playground({
       source: Track.Source.Microphone,
     };
   }
-
   const agentVideoTrack = tracks.find(
     (trackRef) =>
       trackRef.publication.kind === Track.Kind.Video &&
@@ -183,15 +181,15 @@ export default function Playground({
 
   const audioTileContent = useMemo(() => {
     const disconnectedContent = (
-      <div className="flex flex-col items-center justify-center gap-2 text-gray-700 text-center w-full">
-        No audio track. Connect to get started.
+      <div className="flex flex-col items-center justify-center gap-2 text-gray-700 text-center w-full text-xl">
+        右上の「接続」を押してください。
       </div>
     );
 
     const waitingContent = (
       <div className="flex flex-col items-center gap-2 text-gray-700 text-center w-full">
         <LoadingSVG />
-        Waiting for audio track
+        音声を読み込み中です。
       </div>
     );
 
@@ -242,28 +240,7 @@ export default function Playground({
 
   const settingsTileContent = useMemo(() => {
     return (
-      <div className="flex flex-col gap-4 h-full w-full items-start overflow-y-auto">
-        {config.description && (
-          <ConfigurationPanelItem title="Description">
-            {config.description}
-          </ConfigurationPanelItem>
-        )}
-
-        <ConfigurationPanelItem title="Settings">
-          {localParticipant && (
-            <div className="flex flex-col gap-2">
-              <NameValueRow
-                name="Room"
-                value={name}
-                valueColor={`${config.settings.theme_color}-500`}
-              />
-              <NameValueRow
-                name="Participant"
-                value={localParticipant.identity}
-              />
-            </div>
-          )}
-        </ConfigurationPanelItem>
+      <div className="flex flex-col gap-4 h-full w-full items-start overflow-y-auto bg-white">
         <ConfigurationPanelItem title="Status">
           <div className="flex flex-col gap-2">
             <NameValueRow
@@ -313,27 +290,6 @@ export default function Playground({
             </div>
           </ConfigurationPanelItem>
         )}
-        {localMicTrack && (
-          <ConfigurationPanelItem
-            title="Microphone"
-            deviceSelectorKind="audioinput"
-          >
-            <AudioInputTile frequencies={localMultibandVolume} />
-          </ConfigurationPanelItem>
-        )}
-        <div className="w-full">
-          <ConfigurationPanelItem title="Color">
-            <ColorPicker
-              colors={themeColors}
-              selectedColor={config.settings.theme_color}
-              onSelect={(color) => {
-                const userSettings = { ...config.settings };
-                userSettings.theme_color = color;
-                setUserSettings(userSettings);
-              }}
-            />
-          </ConfigurationPanelItem>
-        </div>
         {config.show_qr && (
           <div className="w-full">
             <ConfigurationPanelItem title="QR Code">
@@ -394,20 +350,6 @@ export default function Playground({
     });
   }
 
-  mobileTabs.push({
-    title: "Settings",
-    content: (
-      <PlaygroundTile
-        padding={false}
-        backgroundColor="gray-950"
-        className="h-full w-full basis-1/4 items-start overflow-y-auto flex"
-        childrenClassName="h-full grow items-start"
-      >
-        {settingsTileContent}
-      </PlaygroundTile>
-    ),
-  });
-
   return (
     <>
       <PlaygroundHeader
@@ -433,7 +375,7 @@ export default function Playground({
           />
         </div>
         <div
-          className={`flex-col grow basis-1/2 gap-4 h-full hidden lg:${
+          className={`flex-col grow basis-1/5 gap-4 h-full hidden lg:${
             !config.settings.outputs.audio && !config.settings.outputs.video
               ? "hidden"
               : "flex"
@@ -448,33 +390,35 @@ export default function Playground({
               {videoTileContent}
             </PlaygroundTile>
           )}
+          {localMicTrack && (
+              <ConfigurationPanelItem
+                  title="Microphone"
+                  deviceSelectorKind="audioinput"
+              >
+                <AudioInputTile frequencies={localMultibandVolume} />
+              </ConfigurationPanelItem>
+          )}
           {config.settings.outputs.audio && (
-            <PlaygroundTile
-              title="Audio"
-              className="w-full h-full grow"
-              childrenClassName="justify-center"
-            >
-              {audioTileContent}
-            </PlaygroundTile>
+              <>
+                <PlaygroundTile
+                    title="Audio"
+                    className="w-full h-full grow"
+                    childrenClassName="justify-center"
+                >
+                  {audioTileContent}
+                </PlaygroundTile>
+              </>
           )}
         </div>
 
         {config.settings.chat && (
           <PlaygroundTile
             title="Chat"
-            className="h-full grow basis-1/4 hidden lg:flex"
+            className="h-full grow basis-3/4 hidden lg:flex"
           >
             {chatTileContent}
           </PlaygroundTile>
         )}
-        <PlaygroundTile
-          padding={false}
-          backgroundColor="gray-950"
-          className="h-full w-full basis-1/4 items-start overflow-y-auto hidden max-w-[480px] lg:flex"
-          childrenClassName="h-full grow items-start"
-        >
-          {settingsTileContent}
-        </PlaygroundTile>
       </div>
     </>
   );
