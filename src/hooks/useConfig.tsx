@@ -38,7 +38,7 @@ export type UserSettings = {
 
 // Fallback if NEXT_PUBLIC_APP_CONFIG is not set
 const defaultConfig: AppConfig = {
-  title: "土壌汚染対策法について知りたいことをご質問ください",
+  title: "Ai Agents by iPresence",
   description: "A playground for testing LiveKit Agents",
   video_fit: "cover",
   settings: {
