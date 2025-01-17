@@ -14,6 +14,7 @@ import { PlaygroundToast, ToastType } from "@/components/toast/PlaygroundToast";
 import { ConfigProvider, useConfig } from "@/hooks/useConfig";
 import { ConnectionMode, ConnectionProvider, useConnection } from "@/hooks/useConnection";
 import { useMemo } from "react";
+import { ToastProvider, useToast } from "@/components/toast/ToasterProvider";
 
 const themeColors = [
   "cyan",
@@ -24,29 +25,29 @@ const themeColors = [
   "rose",
   "pink",
   "teal",
+  "white",
 ];
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   return (
-    <ConfigProvider>
-      <ConnectionProvider>
-        <HomeInner />
-      </ConnectionProvider>
-    </ConfigProvider>
+    <ToastProvider>
+      <ConfigProvider>
+        <ConnectionProvider>
+          <HomeInner />
+        </ConnectionProvider>
+      </ConfigProvider>
+    </ToastProvider>
   );
 }
 
 export function HomeInner() {
-  const [toastMessage, setToastMessage] = useState<{
-    message: string;
-    type: ToastType;
-  } | null>(null);
   const { shouldConnect, wsUrl, token, mode, connect, disconnect } =
     useConnection();
   
   const {config} = useConfig();
+  const { toastMessage, setToastMessage } = useToast();
 
   const handleConnect = useCallback(
     async (c: boolean, mode: ConnectionMode) => {
@@ -84,7 +85,7 @@ export function HomeInner() {
         <meta property="og:image:height" content="630" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="relative flex flex-col justify-center px-4 items-center h-full w-full bg-black repeating-square-background">
+      <main className="relative flex flex-col justify-center px-4 items-center h-full w-full bg-white repeating-square-background">
         <AnimatePresence>
           {toastMessage && (
             <motion.div
@@ -93,13 +94,7 @@ export function HomeInner() {
               animate={{ opacity: 1, translateY: 0 }}
               exit={{ opacity: 0, translateY: -50 }}
             >
-              <PlaygroundToast
-                message={toastMessage.message}
-                type={toastMessage.type}
-                onDismiss={() => {
-                  setToastMessage(null);
-                }}
-              />
+              <PlaygroundToast />
             </motion.div>
           )}
         </AnimatePresence>
