@@ -62,16 +62,22 @@ export const ConnectionProvider = ({
         token = config.settings.token;
         url = config.settings.ws_url;
       }
-      setConnectionDetails({ wsUrl: url, token, shouldConnect: true, mode });
-    },
-    [
-      cloudWSUrl,
-      config.settings.token,
-      config.settings.ws_url,
-      generateToken,
-      setToastMessage,
-    ]
-  );
+      url = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+      const {accessToken} = await fetch(
+        `/api/token?control_room=${params.get("control_room")}&serial_number=${params.get("serial_number")}`
+      ).then((res) => res.json());
+      token = accessToken;
+    } else {
+      token = config.settings.token;
+      url = config.settings.ws_url;
+    }
+    setConnectionDetails({ wsUrl: url, token, shouldConnect: true, mode });
+  }, [
+    cloudWSUrl,
+    config.settings.token,
+    config.settings.ws_url,
+    generateToken,
+  ]);
 
   const disconnect = useCallback(async () => {
     setConnectionDetails((prev) => ({ ...prev, shouldConnect: false }));
